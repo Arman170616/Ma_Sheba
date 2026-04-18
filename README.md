@@ -7,7 +7,13 @@
 
 ## 🖥️ Live Preview
 
-![Ma Sheba Homepage](screenshots/homepage.png)
+| Home Page | Admin Dashboard |
+|-----------|----------------|
+| ![Homepage](screenshots/homepage.png) | ![Admin](screenshots/admin-dashboard.png) |
+
+| পরিচালনা পরিষদ | গ্যালারি |
+|----------------|---------|
+| ![Board](screenshots/board.png) | ![Gallery](screenshots/gallery.png) |
 
 ---
 
@@ -29,12 +35,12 @@
 - **সংবাদ (News)** — Dynamic news portal with category filtering
 - **গ্যালারি (Gallery)** — Photo & video gallery with lightbox and YouTube embed support
 
-### Admin Panel
-- Secure token-based login (`/admin-login`)
-- **Member Management** — Add/remove/toggle visibility with photo upload
-- **News Management** — Publish/unpublish articles
-- **Gallery Management** — Upload images or add YouTube video links
-- Django `/admin/` panel with full CRUD and Bangla labels
+### Admin Panel (`/admin-login` — username: `admin` / password: `maseba2024`)
+- Secure token-based authentication
+- **সদস্য ব্যবস্থাপনা** — Add/remove members with photo upload, toggle site visibility
+- **সংবাদ ব্যবস্থাপনা** — Publish/unpublish news articles
+- **গ্যালারি ব্যবস্থাপনা** — Upload images or embed YouTube videos
+- Django `/admin/` panel with Bangla labels and full CRUD
 
 ---
 
@@ -55,34 +61,35 @@
 
 ```
 Ma-Sheda/
-├── Frontend/                  # React + TypeScript frontend
+├── Frontend/                       # React + TypeScript frontend
 │   ├── src/
 │   │   ├── pages/
 │   │   │   ├── Home.tsx
-│   │   │   ├── Board.tsx      # Shows board + regular members
+│   │   │   ├── Board.tsx           # Leadership + regular members with photos
 │   │   │   ├── News.tsx
-│   │   │   ├── Gallery.tsx    # Photo & video gallery
+│   │   │   ├── Gallery.tsx         # Photo & video gallery with lightbox
 │   │   │   ├── AdminLogin.tsx
-│   │   │   └── AdminDashboard.tsx
+│   │   │   └── AdminDashboard.tsx  # Members, News, Gallery management
 │   │   ├── components/
 │   │   │   ├── Navbar.tsx
 │   │   │   └── Footer.tsx
-│   │   ├── api.ts             # API client (token auth, FormData upload)
+│   │   ├── api.ts                  # API client (token auth, FormData upload)
 │   │   └── types.ts
 │   ├── package.json
 │   └── vite.config.ts
 │
-└── backend/                   # Django REST API
+└── backend/                        # Django REST API
     ├── api/
-    │   ├── models.py          # BoardMember, Member, NewsItem, GalleryItem
-    │   ├── views.py           # ViewSets + login/logout
+    │   ├── models.py               # BoardMember, Member, NewsItem, GalleryItem
+    │   ├── views.py                # ViewSets + token login/logout
     │   ├── serializers.py
     │   ├── urls.py
-    │   └── admin.py           # Bangla-labeled Django admin
+    │   └── admin.py                # Bangla-labeled Django admin
     ├── backend/
     │   ├── settings.py
     │   └── urls.py
-    └── manage.py
+    ├── manage.py
+    └── seed_data.py                # Seeds sample board, members & news
 ```
 
 ---
@@ -105,10 +112,26 @@ cd Ma_Sheba
 
 ```bash
 cd backend
+
+# Install dependencies
 pip install django djangorestframework django-cors-headers pillow
+
+# Apply migrations
 python manage.py migrate
-python manage.py createsuperuser   # or use: admin / maseba2024
-python seed_data.py                # loads sample board, members, news
+
+# Create admin user
+python manage.py createsuperuser
+# OR: pre-configured user is created by seed_data.py (admin / maseba2024)
+
+# Load sample data (board members, members, news)
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+U = get_user_model()
+U.objects.filter(username='admin').exists() or U.objects.create_superuser('admin', 'admin@maseba.org', 'maseba2024')
+"
+python seed_data.py
+
+# Start server
 python manage.py runserver 8000
 ```
 
@@ -120,12 +143,12 @@ npm install
 npm run dev
 ```
 
-### 4. Access
+### 4. Access the App
 
 | URL | Description |
 |-----|-------------|
 | `http://localhost:5173` | Public website |
-| `http://localhost:5173` → Admin login | Admin panel (username: `admin`, password: `maseba2024`) |
+| `http://localhost:5173` → Admin | Admin panel (admin / maseba2024) |
 | `http://localhost:8000/admin/` | Django admin panel |
 | `http://localhost:8000/api/` | REST API browser |
 
@@ -133,33 +156,17 @@ npm run dev
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/login/` | Admin login → returns token |
-| POST | `/api/auth/logout/` | Admin logout |
-| GET | `/api/news/` | Published news (public) |
-| GET/POST/PATCH/DELETE | `/api/news/{id}/` | News CRUD (admin) |
-| GET | `/api/members/` | Visible members (public) / all (admin) |
-| GET/POST/PATCH/DELETE | `/api/members/{id}/` | Member CRUD with photo upload |
-| GET | `/api/board-members/` | Board members (public) |
-| GET | `/api/gallery/` | Published gallery items (public) |
-| GET/POST/PATCH/DELETE | `/api/gallery/{id}/` | Gallery CRUD with image upload |
-
----
-
-## 📸 Screenshots
-
-### Home Page
-![Homepage](screenshots/homepage.png)
-
-### Admin Dashboard
-![Admin Dashboard](screenshots/admin-dashboard.png)
-
-### পরিচালনা পরিষদ (Board)
-![Board Page](screenshots/board.png)
-
-### গ্যালারি (Gallery)
-![Gallery Page](screenshots/gallery.png)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/auth/login/` | Public | Admin login → returns token |
+| `POST` | `/api/auth/logout/` | Token | Admin logout |
+| `GET` | `/api/news/` | Public | Published news |
+| `POST/PATCH/DELETE` | `/api/news/{id}/` | Admin | News CRUD |
+| `GET` | `/api/members/` | Public | Visible members |
+| `POST/PATCH/DELETE` | `/api/members/{id}/` | Admin | Member CRUD + photo upload |
+| `GET` | `/api/board-members/` | Public | Board members |
+| `GET` | `/api/gallery/` | Public | Published gallery items |
+| `POST/PATCH/DELETE` | `/api/gallery/{id}/` | Admin | Gallery CRUD + image upload |
 
 ---
 
