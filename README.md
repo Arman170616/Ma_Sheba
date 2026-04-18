@@ -7,13 +7,22 @@
 
 ## 🖥️ Live Preview
 
-| Home Page | Admin Dashboard |
-|-----------|----------------|
-| ![Homepage](screenshots/homepage.png) | ![Admin](screenshots/admin-dashboard.png) |
+### Home Page
+![Homepage](screenshots/homepage.png)
 
-| পরিচালনা পরিষদ | গ্যালারি |
-|----------------|---------|
-| ![Board](screenshots/board.png) | ![Gallery](screenshots/gallery.png) |
+### Admin Dashboard
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### পরিচালনা পরিষদ (Board + Members)
+![Board](screenshots/board.png)
+
+### সংবাদ (News Portal)
+![News](screenshots/news.png)
+
+### গ্যালারি (Gallery)
+![Gallery](screenshots/gallery.png)
+
+
 
 ---
 
